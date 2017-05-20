@@ -1,0 +1,190 @@
+<job id="ZTICreateNewAdminAccount">
+   <script language="VBScript" src="..\ZTIUtility.vbs"/>
+   <script language="VBScript">
+
+' // ***************************************************************************
+' // 
+' // Copyright (c) Microsoft Corporation.  All rights reserved.
+' // 
+' // Microsoft Deployment Toolkit Solution Accelerator
+' //
+' // File:      ZTICreateNewAdminAccount.wsf
+' // 
+' // Version:   1.0
+' // 
+' // Purpose:   Solution Accelerator for Business Desktop Deployment
+' //
+' // Purpose:   Solution Accelerator for Business Desktop Deployment
+' // 
+' // Usage:     cscript ZTICreateNewAdminAccount.wsf
+' // 
+' // ***************************************************************************
+
+
+Option Explicit
+RunNewInstance
+
+'//----------------------------------------------------------------------------
+'//  Global Constants
+'//----------------------------------------------------------------------------
+
+Const ANSWER_TO_LIFE_THE_UNIVERSE_AND_EVERYTHING = 42
+
+
+'//----------------------------------------------------------------------------
+'//  Main Class
+'//----------------------------------------------------------------------------
+
+Class ZTICreateNewAdminAccount
+
+	'//----------------------------------------------------------------------------
+	'//  Global constant and variable declarations
+	'//----------------------------------------------------------------------------
+
+	Dim iRetVal
+
+	'//----------------------------------------------------------------------------
+	'//  Constructor to initialize needed global objects
+	'//----------------------------------------------------------------------------
+
+	Private Sub Class_Initialize
+
+	End Sub
+	
+	
+	'//----------------------------------------------------------------------------
+	'//  Main routine
+	'//----------------------------------------------------------------------------
+
+	Function Main
+	
+		' Local Variables
+		
+		
+		' Decode password
+		dim sPassword
+		sPassword = oEnvironment.Item("AdminPassword")
+		sPassword = oStrings.base64Decode(sPassword)
+		
+		iRetVal = Success
+
+		oLogging.CreateEntry "PROPERTY CreateNewAdminAccount is " & oEnvironment.Item("CreateNewAdminAccount"), LogTypeInfo
+
+		' Create new account, add to admin group, and then disable built-in administrator account
+
+		If oEnvironment.Item("CreateNewAdminAccount") = "YES" Then
+		
+			oLogging.CreateEntry "The built-in Administrator account will be disabled and a new administrator account will be created.", LogTypeInfo
+					
+			dim oExec
+			dim sCMD
+			dim sLine, sOutput
+			
+			'Create new account
+			
+			oLogging.CreateEntry "New administrator account to be created: " & oEnvironment.Item("NewAdminAccount"), LogTypeInfo
+			
+			sCmd = "cmd /c net user /add " & oEnvironment.Item("NewAdminAccount") & " " & oEnvironment.Item("AdminPassword") 
+			set oExec = oShell.Exec(sCmd)
+			
+			If not oExec.StdOut.atEndOfStream then
+			sLine = oExec.StdOut.ReadLine
+			oLogging.CreateEntry sLine, LogTypeInfo
+			If not isnull(sOutput) then			
+				sOutput = sOutput & vbNewLine & sLine
+			End if
+			End If
+			If not oExec.StdErr.atEndOfStream then
+				sLine = oExec.StdErr.ReadLine
+				oLogging.CreateEntry sLine, LogTypeError
+				Main = FAILURE
+				Exit Function				
+			End If
+			
+			oLogging.CreateEntry "New administrator account created: " & oEnvironment.Item("NewAdminAccount"), LogTypeInfo
+			
+			'Set new account to have non-expiring password
+			
+			If oEnvironment.Item("NewAdminAccountPasswordDoesNotExpire") = "YES" Then
+			
+				oLogging.CreateEntry oEnvironment.Item("NewAdminAccount") & " password will be set to not expire.", LogTypeInfo
+				
+				sCmd = "cmd /c WMIC USERACCOUNT WHERE ""Name='" & oEnvironment.Item("NewAdminAccount") & "'"" SET PasswordExpires=FALSE"
+				set oExec = oShell.Exec(sCmd)
+				
+				If not oExec.StdOut.atEndOfStream then
+				sLine = oExec.StdOut.ReadLine
+				oLogging.CreateEntry sLine, LogTypeInfo
+				If not isnull(sOutput) then			
+					sOutput = sOutput & vbNewLine & sLine
+				End if
+				End If
+				If not oExec.StdErr.atEndOfStream then
+					sLine = oExec.StdErr.ReadLine
+					oLogging.CreateEntry sLine, LogTypeError
+					Main = FAILURE
+					Exit Function				
+				End If
+			
+			oLogging.CreateEntry oEnvironment.Item("NewAdminAccount") & " account password will not expire.", LogTypeInfo
+			
+			End If
+		
+			'Add new account to administrators group
+
+			oLogging.CreateEntry "New administrator account: " & oEnvironment.Item("NewAdminAccount") & " to be added to local administrators group.", LogTypeInfo
+			
+			sCmd = "cmd /c net localgroup administrators " & oEnvironment.Item("NewAdminAccount") & " /add"
+			set oExec = oShell.Exec(sCmd)
+			
+			If not oExec.StdOut.atEndOfStream then
+			sLine = oExec.StdOut.ReadLine
+			oLogging.CreateEntry sLine, LogTypeInfo
+			If not isnull(sOutput) then			
+				sOutput = sOutput & vbNewLine & sLine
+			End if
+			End If
+			If not oExec.StdErr.atEndOfStream then
+				sLine = oExec.StdErr.ReadLine
+				oLogging.CreateEntry sLine, LogTypeError
+				Main = FAILURE
+				Exit Function				
+			End If
+
+			'Disable built-in administrator
+			
+			oLogging.CreateEntry "Built-in Administrator account to be disabled", LogTypeInfo
+			
+			sCmd = "cmd /c net user Administrator /active:no"
+			set oExec = oShell.Exec(sCmd)
+			
+			If not oExec.StdOut.atEndOfStream then
+			sLine = oExec.StdOut.ReadLine
+			oLogging.CreateEntry sLine, LogTypeInfo
+			If not isnull(sOutput) then			
+				sOutput = sOutput & vbNewLine & sLine
+			End if
+			End If
+			If not oExec.StdErr.atEndOfStream then
+				sLine = oExec.StdErr.ReadLine
+				oLogging.CreateEntry sLine, LogTypeError
+				Main = FAILURE
+				Exit Function				
+			End If
+		
+			oLogging.CreateEntry "Built-in Administrator account disabled", LogTypeInfo
+
+		Else
+		
+			oLogging.CreateEntry "PROPERTY CreateNewAdminAccount not TRUE. No changes will be made.", LogTypeInfo
+		
+		End If
+		
+		Main = iRetVal
+
+	End Function
+
+End Class
+
+   </script>
+</job>

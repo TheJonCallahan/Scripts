@@ -1,0 +1,78 @@
+<job id="ZTIEnableMicrosoftUpdate">
+	<script language="VBScript" src="..\ZTIUtility.vbs"/>
+	<script language="VBScript">
+' // ***************************************************************************
+' // 
+' // Copyright (c) Microsoft Corporation.  All rights reserved.
+' // 
+' // Microsoft Deployment Toolkit Solution Accelerator
+' //
+' // File:      ZTIEnableMicrosoftUpdate.wsf
+' // 
+' // Version:   6.2.5019.0
+' // 
+' // Purpose:   Enables Microsoft Update
+' // 
+' // Usage:     cscript.exe [//nologo] ZTIEnableMicrosoftUpdate.wsf [/debug:true]
+' // 
+' // ***************************************************************************
+
+
+
+Option Explicit
+RunNewInstance
+
+'//----------------------------------------------------------------------------
+'//  Global Constants
+'//----------------------------------------------------------------------------
+
+Const ANSWER_TO_LIFE_THE_UNIVERSE_AND_EVERYTHING = 42
+
+
+'//----------------------------------------------------------------------------
+'//  Main Class
+'//----------------------------------------------------------------------------
+
+Class ZTIEnableMicrosoftUpdate
+
+	'//----------------------------------------------------------------------------
+	'//  Global constant and variable declarations
+	'//----------------------------------------------------------------------------
+
+	Dim iRetVal
+
+	'//----------------------------------------------------------------------------
+	'//  Constructor to initialize needed global objects
+	'//----------------------------------------------------------------------------
+
+	Private Sub Class_Initialize
+
+	End Sub
+	
+	
+	'//----------------------------------------------------------------------------
+	'//  Main routine
+	'//----------------------------------------------------------------------------
+
+	Function Main
+
+		Dim ServiceManager
+		Dim NewUpdateService 
+	
+		' Opt-In to the Microsoft Update Agent
+
+		oLogging.CreateEntry "Enabling Microsoft Update.", LogTypeInfo
+
+		Set ServiceManager = CreateObject("Microsoft.Update.ServiceManager") 
+		ServiceManager.ClientApplicationID = "My App"  
+		'add the Microsoft Update Service by GUID 
+		Set NewUpdateService = ServiceManager.AddService2("7971f918-a847-4430-9279-4a52d1efe18d",7,"")
+
+		oLogging.CreateEntry "Microsoft Update enabled.", LogTypeInfo
+
+	End Function
+
+End Class
+
+   </script>
+</job>

@@ -1,0 +1,85 @@
+<!--
+
+' // ***************************************************************************
+' // 
+' // Copyright (c) Microsoft Corporation.  All rights reserved.
+' // 
+' // Microsoft Deployment Toolkit Solution Accelerator
+' //
+' // File:      DeployWiz_WindowsUpdate.xml
+' // 
+' // Version:   1.0
+' // 
+' // Author:	Jon Callahan (jon.callahan@microsoft.com)
+' // 
+' // Purpose:   Windows Update wizard pane for MDT
+' // 
+' // ***************************************************************************
+
+-->
+<Wizard>
+  <Global>
+    <CustomScript>Custom\DeployWiz_WindowsUpdate.vbs</CustomScript>
+  </Global>
+  <Pane id="WindowsUpdate" title="Windows Update">
+    <Body><![CDATA[
+	<H1>Specify whether to run Windows Update.</H1>
+	<table>
+
+	<tr>
+		<td>
+			<input type=radio name="ApplyWindowsUpdate" id="WindowsUpdateRadio1" value="YES" language=vbscript onclick=ValidateWindowsUpdate AccessKey=R>
+		</td>
+		<td>
+			<Label class="Larger" for=WindowsUpdateRadio1 language=vbscript><u class="Larger">R</u>un Windows Update.</Label>
+		</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td>
+			<div>Install all available updates from Microsoft Update.</div>
+			<br>
+		</td>
+	</tr>
+
+
+	<tr>
+		<td>
+			<input type=radio name="ApplyWindowsUpdate" id="WindowsUpdateRadio2" value="YES" language=vbscript onclick=ValidateWindowsUpdate AccessKey=W>
+		</td>
+		<td>
+			<Label class="Larger" for=WindowsUpdateRadio2 language=vbscript>Run Windows Update using <u class="Larger">W</u>SUS.</Label>
+		</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td>
+			<div>Install Windows updates using a Windows Server Update Services (WSUS) server.</div>
+			<br>
+			<div>WSUS <u>S</u>erver URL:  <label class=ErrMsg for=WSUSServerURL>* Required (MISSING)</label></div>
+   			<input type=text name="WSUSServer" id="WSUSServerURL" size=65 disabled AccessKey=S>
+			<br>
+		</td>
+	</tr>
+
+
+	<tr>
+		<td valign="top">
+			<input type=radio name="ApplyWindowsUpdate" id="WindowsUpdateRadio3" Value="NO" language=vbscript onclick=ValidateWindowsUpdate AccessKey=D>
+		</td>
+		<td>
+			<Label class="Larger" for=WindowsUpdateRadio3 language=vbscript ><u class="Larger">D</u>o not run Windows Update.</Label>
+		  <div>Do not install any Windows updates during the deployment.</div>
+			<br>
+		</td>
+	</tr>
+
+	</table>
+		]]></Body>
+    <Initialization><![CDATA[InitializeWindowsUpdate]]></Initialization>
+    <Condition><![CDATA[ UCase(Property("SkipWindowsUpdate")) <> "YES"]]></Condition>
+    <Validation><![CDATA[ValidateWindowsUpdate]]></Validation>
+    <Validation><![CDATA[ValidateWindowsUpdateExit]]></Validation>
+    <Condition><![CDATA[ UCase(Property("SkipWindowsUpdate"))<>"YES" ]]></Condition>
+  </Pane>
+</Wizard>
