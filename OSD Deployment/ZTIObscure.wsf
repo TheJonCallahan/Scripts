@@ -1,0 +1,155 @@
+<job id="Template">
+	<script language="VBScript" src="..\ZTIUtility.vbs"/>
+	<script language="VBScript">
+' //***************************************************************************
+' // ***** Script Header *****
+' //
+' // Solution: Custom Script for Microsoft Deployment Toolkit
+' // File: MDTGetResourceAdvertsDeploys.wsf
+' //
+' // Purpose: Script to obscure or unobscure values written to an INI file.
+' //
+' // Requirements: ZTIObscure.wsf  and ZTIUtility.vbs
+' //
+' // Usage: cscript ZTIObscure.wsf /Obscure:"<variable to obscure>" /Unobscure:"<variable to unobscure>" /folder:"<subfolder name>"
+' //
+' // Version: 1.3.1
+' //
+' // History:
+' // 1.0.0   03/14/2012   Created script.
+' //
+' //*************************************************************************** 
+' //
+' // This script is provided "AS IS" with no warranties, confers no rights and 
+' // is not supported by the authors or Microsoft Corporation. 
+' // Use of this script sample is subject to the terms specified at 
+' // http://www.microsoft.com/info/cpyright.mspx.
+' //
+' // ***** End Header *****
+' //***************************************************************************
+
+
+'//----------------------------------------------------------------------------
+'//
+'//  Global constant and variable declarations
+'//
+'//----------------------------------------------------------------------------
+
+'Option Explicit
+
+Dim iRetVal
+
+'//----------------------------------------------------------------------------
+'//  End declarations
+'//----------------------------------------------------------------------------
+
+
+'//----------------------------------------------------------------------------
+'//  Main routine
+'//----------------------------------------------------------------------------
+
+On Error Resume Next
+iRetVal = ZTIProcess
+ProcessResults iRetVal
+On Error Goto 0
+
+
+'//---------------------------------------------------------------------------
+'//
+'//  Function:	ZTIProcess()
+'//
+'//  Input:	None
+'// 
+'//  Return:	Success - 0
+'//		Failure - non-zero
+'//
+'//  Purpose:	Perform main ZTI processing
+'//		
+'//---------------------------------------------------------------------------
+Function ZTIProcess() 
+
+     ZTIProcess = Success
+	 
+    ' Get items to obscure
+
+    If oUtility.Arguments.Exists("Obscure") AND oUtility.Arguments.Exists("Unobscure") then
+		oLogging.CreateEntry "Obscure and Unobscure arguments cannot be used together.  Exiting script.", LogTypeError
+        ZTIProcess = Failure
+	ElseIf oUtility.Arguments.Exists("Obscure") then
+        sItems = oEnvironment.Item("obscure")
+		sArgument = "Obscure"
+		oLogging.CreateEntry "Obscure argument provided. Script will obscure: " &  sItems, LogTypeInfo
+    ElseIf oUtility.Arguments.Exists("Unobscure") then
+		sItems = oEnvironment.Item("Unobscure")
+		sArgument = "Unobscure"
+		oLogging.CreateEntry "Obscure argument provided. Script will unobscure: " &  sItems, LogTypeInfo
+	Else
+        oLogging.CreateEntry "Obscure or Unobscure argument required.  Exiting script.", LogTypeError
+        ZTIProcess = Failure
+        Exit Function
+    End If
+	
+    ' Get items to process (comma separated list)
+
+    If sItems <> "" then
+        sItems = oShell.ExpandEnvironmentStrings((oEnvironment.Item(sArgument)))
+        arrItems = Split(sItems, ",")
+    Else
+        oLogging.CreateEntry "Obscure or Unobscure argument required.  Exiting script.", LogTypeError
+        ZTIProcess = Failure
+        Exit Function
+    End If
+	
+	' Get location and filename of the INI file
+
+    If oUtility.Arguments.Exists("inipath") then
+        sINIPath = oEnvironment.Item("inipath")
+    Else
+        oLogging.CreateEntry "INIPath argument required.  Exiting script.", LogTypeError
+        ZTIProcess = Failure
+        Exit Function
+    End If
+	
+	' Obscure the provided items and write to file
+	If oUtility.Arguments.Exists("Obscure") then
+		For i = 0 to UBound(arrItems)
+				sObscureItem = "Obscured" & i
+				If oEnvironment.Item(arrItems(i)) <> "" Then
+					sObscureEnv = oEnvironment.Item(arrItems(i))
+					sObscureValue = oStrings.base64Encode(sObscureEnv)
+				Else
+					sObscureValue = oStrings.base64Encode(arrItems(i))
+				End If
+				Err.Clear
+				oUtility.WriteIni sINIPath, "Obscured", sObscureItem, sObscureValue 
+				oLogging.CreateEntry "Obscuring " & arrItems(i) & " as " & sObscureValue, LogTypeInfo
+				If Err then
+					oLogging.CreateEntry "WARNING - Error writing " & arrItems(i) & " to INI file,  " & Err.Description & " (" & Err.Number & ")", LogTypeError
+					ZTIProcess = Failure
+					Exit Function
+				End if
+		Next
+	End IF
+	
+	' Unobscure the provided items and write to Enviorment Variable
+	If oUtility.Arguments.Exists("Unobscure") then
+		For i = 0 to UBound(arrItems)
+			Err.Clear
+			sObscuredItem = arrItems(i)
+			sObscuredValue = oUtility.ReadIni(sINIPath,"Obscured",sObscuredItem)
+			sObscuredValue = oStrings.base64Decode(sObscuredValue)
+			oEnvironment.Item(sObscuredItem) = sObscuredValue
+			If Err then
+				oLogging.CreateEntry "WARNING - Error reading " & arrItems(i) & " from INI file,  " & Err.Description & " (" & Err.Number & ")", LogTypeError
+				ZTIProcess = Failure
+				Exit Function
+			End if
+		Next
+	End IF
+	
+    oLogging.CreateEntry sSName & ": ******************** Completed actions ******************** ", LogTypeInfo
+	 
+End Function
+
+	</script>
+</job>
