@@ -1,0 +1,88 @@
+<job id="ZTIVerifyDeployRootDisk">
+   <script language="VBScript" src="..\ZTIUtility.vbs"/>
+   <script language="VBScript" src="..\ZTIDiskUtility.vbs"/>
+   <script language="VBScript">
+
+' // ***************************************************************************
+' // 
+' // Copyright (c) Microsoft Corporation.  All rights reserved.
+' // 
+' // Microsoft Deployment Toolkit Solution Accelerator
+' //
+' // File:      ZTIVerifyDeployRootDisk.wsf
+' // 
+' // Version:   1.0
+' // 
+' // Purpose:   Solution Accelerator for Business Desktop Deployment
+' //
+' // Purpose:   Solution Accelerator for Business Desktop Deployment
+' // 
+' // Usage:     cscript ZTIVerifyDeployRootDisk.wsf
+' // 
+' // ***************************************************************************
+
+
+Option Explicit
+RunNewInstance
+
+'//----------------------------------------------------------------------------
+'//  Global Constants
+'//----------------------------------------------------------------------------
+
+Const ANSWER_TO_LIFE_THE_UNIVERSE_AND_EVERYTHING = 42
+
+
+'//----------------------------------------------------------------------------
+'//  Main Class
+'//----------------------------------------------------------------------------
+
+Class ZTIVerifyDeployRootDisk
+
+	'//----------------------------------------------------------------------------
+	'//  Global constant and variable declarations
+	'//----------------------------------------------------------------------------
+
+	Dim iRetVal
+
+	'//----------------------------------------------------------------------------
+	'//  Constructor to initialize needed global objects
+	'//----------------------------------------------------------------------------
+
+	Private Sub Class_Initialize
+
+	End Sub
+	
+	
+	'//----------------------------------------------------------------------------
+	'//  Main routine
+	'//----------------------------------------------------------------------------
+
+	Function Main
+	
+		' Local Variables
+		
+
+		iRetVal = Success
+
+	
+			If GetDiskForDrive(left(oEnvironment.Item("DeployRoot"),2)) = 0 Then
+			
+				oLogging.CreateEntry "DeployRoot is Disk " & GetDiskForDrive(left(oEnvironment.Item("DeployRoot"),2)) & " and cannot be deployed to. Will assume OSDisk should be Disk 1.", LogTypeInfo
+				oEnvironment.Item("DeployRootIsDisk0") = TRUE
+			
+			Else
+			
+				oLogging.CreateEntry "DeployRoot is not Disk 0. Will assume OSDisk should be Disk 0.", LogTypeInfo
+				oEnvironment.Item("DeployRootIsDisk0") = FALSE
+			
+			End If
+			
+	
+		Main = iRetVal
+
+	End Function
+
+End Class
+
+   </script>
+</job>

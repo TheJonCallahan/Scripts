@@ -1,0 +1,68 @@
+<job id="ZTIRandomStart">
+   <script language="VBScript" src="ZTIUtility.vbs"/>
+   <script language="VBScript">
+
+' // ***************************************************************************
+' // 
+' // Copyright (c) Microsoft Corporation.  All rights reserved.
+' // 
+' // Microsoft Deployment Toolkit Solution Accelerator
+' //
+' // File:      ZTIRandomStart.wsf
+' // 
+' // Version:   6.0.2058.0
+' // 
+' // Purpose:   Wait timer for a Task Sequence
+' // 
+' // Usage:     cscript ZTIRandomStart.wsf [/debug:true] [/RandomStartHours:<numeric value>]
+' // 
+' // ***************************************************************************
+
+Option Explicit
+RunNewInstance
+
+'//----------------------------------------------------------------------------
+'//
+'//  Global constants
+'//
+'//----------------------------------------------------------------------------
+
+'//----------------------------------------------------------------------------
+'//  Main Class
+'//----------------------------------------------------------------------------
+
+Class ZTIRandomStart
+
+ Function Main
+	Dim iLoopCount, iMaxRunHours, iRandomStartMinutes, iCount
+	
+	Randomize()
+	
+	If oEnvironment.Item("RandomStartHours") = "" Then
+		oLogging.CreateEntry "RandomStartHours is not set. Script will now exit.", LogTypeInfo
+		Exit Function
+	End If
+	
+	iMaxRunHours = oEnvironment.Item("RandomStartHours")
+	iRandomStartMinutes = Int(((iMaxRunHours * 60) * Rnd) + 1)
+
+	oLogging.CreateEntry "The script will now wait " & iRandomStartMinutes & " minutes until the next action begins.", LogTypeInfo
+	
+	iCount = iRandomStartMinutes
+	
+	For iLoopCount = 1 To iRandomStartMinutes
+	
+		iCount = iCount - 1
+		
+		Wscript.sleep 60000
+		oLogging.CreateEntry iCount & " minutes remaining until the next action begins.", LogTypeInfo
+	
+	Next
+	
+	oLogging.CreateEntry iRandomStartMinutes & " minutes has passed. The next action will now begin.", LogTypeInfo
+
+End Function
+
+End Class
+   </script>
+</job>
