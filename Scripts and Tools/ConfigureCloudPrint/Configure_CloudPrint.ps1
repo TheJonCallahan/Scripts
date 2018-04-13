@@ -2,9 +2,9 @@
 # Define Enterprise Cloud Print configuration
 ##########################################################################
 
-$CloudPrinterDiscoveryEndpoint = "<CloudPrinterDiscoveryEndpoint>"
-$CloudPrintOAuthAuthority = "<CloudPrintOAuthAuthority>"
-$CloudPrintOAuthClientId = "<CloudPrintOAuthClientId>"
+$CloudPrinterDiscoveryEndpoint = "CloudPrinterDiscoveryEndpoint"
+$CloudPrintOAuthAuthority = "CloudPrintOAuthAuthority"
+$CloudPrintOAuthClientId = "CloudPrintOAuthClientId"
 $CloudPrintResourceId = "http://MicrosoftEnterpriseCloudPrint/CloudPrint"
 $DiscoveryMaxPrinterLimit = "100"
 $MopriaDiscoveryResourceId = "http://MopriaDiscoveryService/CloudPrint"
@@ -34,14 +34,14 @@ Write-Host "$Message"
 exit
 }
 
+##########################################################################
+# Delete any existing Enterprise Cloud Print instance
+##########################################################################
+
 $session = New-CimSession
 $options = New-Object Microsoft.Management.Infrastructure.Options.CimOperationOptions
 $options.SetCustomOption('PolicyPlatformContext_PrincipalContext_Type', 'PolicyPlatform_UserContext', $false)
 $options.SetCustomOption('PolicyPlatformContext_PrincipalContext_Id', "$SidValue", $false)
-
-##########################################################################
-# Delete any existing Enterprise Cloud Print profile
-##########################################################################
 
 $getInstance = $session.EnumerateInstances($namespaceName, $className, $options)
 
@@ -51,30 +51,31 @@ try
     foreach ($deleteInstance in $deleteInstances)
     {
         $InstanceId = $deleteInstance.InstanceID
-        if ("$InstanceId" -eq "EnterpriseCloudPrint")
+        if ("$InstanceId" -eq $Instance)
         {
             $session.DeleteInstance($namespaceName, $deleteInstance, $options)
-            $Message = "Removed $InstanceId profile"
+            $Message = "Removed $InstanceId instance"
             Write-Host "$Message"
         } else {
-            $Message = "Ignoring existing $InstanceId profile"
+            $Message = "Ignoring existing $InstanceId instance"
             Write-Host "$Message"
         }
     }
 }
 catch [Exception]
 {
-    $Message = "Unable to remove existing outdated instance of Enterprise Cloud Print profile"
+    $Message = "Unable to remove existing outdated $InstanceId instance"
     Write-Host "$Message"
     exit
 }
 
 ##########################################################################
-# Create the Enterprise Cloud Print profile
+# Create the Enterprise Cloud Print instance
 ##########################################################################
 
 try
 {
+    $session = New-CimSession
     $newInstance = New-Object Microsoft.Management.Infrastructure.CimInstance $className, $namespaceName
     $property = [Microsoft.Management.Infrastructure.CimProperty]::Create("ParentID", "$nodeCSPURI", 'String', 'Key')
     $newInstance.CimInstanceProperties.Add($property)
@@ -93,13 +94,13 @@ try
     $property = [Microsoft.Management.Infrastructure.CimProperty]::Create("MopriaDiscoveryResourceId", "$MopriaDiscoveryResourceId", 'String', 'Property')
     $newInstance.CimInstanceProperties.Add($property)
     $session.CreateInstance($namespaceName, $newInstance, $options)
-    $Message = "Created $ProfileName profile."
+    $Message = "Created $InstanceId instance"
 
     Write-Host "$Message"
 }
 catch [Exception]
 {
-    $Message = "Unable to create $ProfileName profile: $_"
+    $Message = "Unable to create $InstanceId instance"
     Write-Host "$Message"
     exit
 }
