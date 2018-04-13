@@ -28,13 +28,13 @@
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 try
 {
-        $bdeProtect = Get-BitLockerVolume $OSDrive
+        $bdeProtect = Get-BitLockerVolume $env:SystemDrive
 
             if ($bdeProtect.KeyProtector.Count -lt 1) 
 	       {
               # Enable Bitlocker using TPM
-            Enable-BitLocker -MountPoint $OSDrive  -TpmProtector -SkipHardwareTest -ErrorAction Continue
-            Enable-BitLocker -MountPoint $OSDrive  -RecoveryPasswordProtector -SkipHardwareTest
+            Enable-BitLocker -MountPoint $env:SystemDrive  -TpmProtector -SkipHardwareTest -ErrorAction Continue
+            Enable-BitLocker -MountPoint $env:SystemDrive  -RecoveryPasswordProtector -SkipHardwareTest
 
 	       }      
 			
@@ -43,8 +43,8 @@ try
                 if (Get-Command $cmdName -ErrorAction SilentlyContinue)
 				{
 					#BackupToAAD-BitLockerKeyProtector commandlet exists
-                    $BLV = Get-BitLockerVolume -MountPoint $OSDrive | select *
-					BackupToAAD-BitLockerKeyProtector -MountPoint $OSDrive -KeyProtectorId $BLV.KeyProtector[1].KeyProtectorId
+                    $BLV = Get-BitLockerVolume -MountPoint $env:SystemDrive | select *
+					BackupToAAD-BitLockerKeyProtector -MountPoint $env:SystemDrive -KeyProtectorId $BLV.KeyProtector[1].KeyProtectorId
                 }
 			    else
                 { 
@@ -61,7 +61,7 @@ try
 
 				# Generate the body to send to AAD containing the recovery information
 				# Get the BitLocker key information from WMI
-					(Get-BitLockerVolume -MountPoint $OSDrive).KeyProtector|?{$_.KeyProtectorType -eq 'RecoveryPassword'}|%{
+					(Get-BitLockerVolume -MountPoint $env:SystemDrive).KeyProtector|?{$_.KeyProtectorType -eq 'RecoveryPassword'}|%{
 					$key = $_
 					write-verbose "kid : $($key.KeyProtectorId) key: $($key.RecoveryPassword)"
 					$body = "{""key"":""$($key.RecoveryPassword)"",""kid"":""$($key.KeyProtectorId.replace('{','').Replace('}',''))"",""vol"":""OSV""}"
@@ -76,13 +76,13 @@ try
 
 			}
 
-            $bdeProtect = Get-BitLockerVolume $OSDrive
+            $bdeProtect = Get-BitLockerVolume $env:SystemDrive
 
             if ($bdeProtect.VolumeStatus -eq "FullyEncrypted" -and $bdeProtect.ProtectionStatus -eq "Off") 
 	        {
 
                # Resume BitLocker if suspended
-               Resume-BitLocker -MountPoint $OSDrive
+               Resume-BitLocker -MountPoint $env:SystemDrive
 	         } 
             
             #>
