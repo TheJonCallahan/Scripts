@@ -40,7 +40,7 @@ $xmlContents = @'
   <Actions Context="Author">
     <Exec>
       <Command>powershell</Command>
-      <Arguments>-command &amp;{Set-NetConnectionProfile -Name corp.coke-bsna.com -NetworkCategory Private}</Arguments>
+      <Arguments>-command &amp;{Set-NetConnectionProfile -Name corp.yourcompanyname.com -NetworkCategory Private}</Arguments>
     </Exec>
   </Actions>
 </Task>
