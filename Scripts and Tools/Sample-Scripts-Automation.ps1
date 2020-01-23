@@ -15,7 +15,7 @@ Get-IntuneManagedDevice -Filter "contains(deviceName,'DESKTOP-7BHCHAI')" | Invok
 
 # Get a device and sync a device by serial number
 
-Get-IntuneManagedDevice -Filter "contains(serialNumber,'DMPWP84UJF8M')" | Invoke-IntuneManagedDeviceSyncDevice
+Get-IntuneManagedDevice -Filter "contains(serialNumber,'MMPWP84UIF8G')" | Invoke-IntuneManagedDeviceSyncDevice
 
 # Get a device by name prefix
 
@@ -23,7 +23,7 @@ Get-IntuneManagedDevice -Filter "startswith(deviceName,'Test')" | Format-Table -
 
 # Get a device enrolled by user
 
-Get-IntuneManagedDevice -Filter "startswith(emailAddress,'testuser01@latealmost.onmicrosoft.com')" | Format-Table -Property deviceName, emailAddress
+Get-IntuneManagedDevice -Filter "startswith(emailAddress,'testuser01@contoso.onmicrosoft.com')" | Format-Table -Property deviceName, emailAddress
 
 # Get a device and lock it
 
@@ -85,8 +85,8 @@ Foreach ($GroupMember in $GroupMembers)
 
 # Copy an Intune device configuration policy
 
-Get-IntuneDeviceConfigurationPolicy -Filter "contains(displayName,'iOS - Device Restrictions')" | New-IntuneDeviceConfigurationPolicy -displayName "iOS - Device Restrictions (copy)"
+Get-IntuneDeviceConfigurationPolicy -Filter "contains(displayName,'_iOS - Device Restrictions')" | New-IntuneDeviceConfigurationPolicy -displayName "_iOS - Device Restrictions (copy)"
 
 # Update an existing device configuration policy
 
-Get-IntuneDeviceConfigurationPolicy -Filter "contains(displayName,'iOS - Device Restrictions')" | Update-IntuneDeviceConfigurationPolicy -cameraBlocked 0
+Get-IntuneDeviceConfigurationPolicy -Filter "contains(displayName,'_iOS - Device Restrictions')" | Update-IntuneDeviceConfigurationPolicy -cameraBlocked 0
