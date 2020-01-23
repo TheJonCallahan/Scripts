@@ -2,7 +2,7 @@ $xmlContents = @'
 <?xml version="1.0" encoding="UTF-16"?>
 <Task version="1.4" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
   <RegistrationInfo>
-    <URI>\Set-NetConnectionProfile - Private - corp.coke-bsna.com</URI>
+    <URI>\Set-NetConnectionProfile - Private - corp.latealmost.com</URI>
   </RegistrationInfo>
   <Triggers>
     <EventTrigger>

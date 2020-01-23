@@ -10,7 +10,7 @@ $username = (Get-ItemProperty HKLM:\SYSTEM\CurrentControlSet\Control\CloudDomain
 # Write values to registry
 
 $registryPath = "HKLM:\SOFTWARE\Microsoft\DeviceOwner"
-$domain = "BSNA"
+$domain = "CORP"
 
 New-Item -Path $registryPath -Force | Out-Null
 
