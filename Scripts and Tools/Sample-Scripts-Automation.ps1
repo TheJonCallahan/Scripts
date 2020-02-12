@@ -1,6 +1,8 @@
 Connect-MSGraph
 Connect-AzureAD
 
+# update-msgraphenvironment -schema beta
+
 # List all Intune cmdlets
 
 Get-Command -Module Microsoft.Graph.Intune
@@ -90,3 +92,69 @@ Get-IntuneDeviceConfigurationPolicy -Filter "contains(displayName,'_iOS - Device
 # Update an existing device configuration policy
 
 Get-IntuneDeviceConfigurationPolicy -Filter "contains(displayName,'_iOS - Device Restrictions')" | Update-IntuneDeviceConfigurationPolicy -cameraBlocked 0
+
+Get-IntuneDeviceConfigurationPolicy -Filter "contains(displayName,'Win10 - test - Endpoint Protection')"
+
+
+# Find all device configuration profiles assigned to a group
+# Connect to Beta endpoint for MS Graph to ensure all policies are returned
+
+update-msgraphenvironment -schema beta
+
+$groupName = "Intune - Pilot Users"
+
+$DCPs = Get-IntuneDeviceConfigurationPolicy
+
+Write-Host "Finding all device configuration profiles assigned to $($groupName)" -ForegroundColor Green
+
+foreach($DCP in $DCPs){
+
+    $DCPA = Get-IntuneDeviceConfigurationPolicyAssignment -deviceConfigurationId $DCP.deviceConfigurationId
+
+    foreach($group in $DCPA){
+
+        if($null -ne $group.target.groupId){
+
+            $Assignments = Get-AADGroup -groupid $group.target.groupId
+
+            if($Assignments.displayName -eq $groupName) {
+                Write-Host $DCP.displayName -ForegroundColor Yellow
+            }
+
+        }
+
+    }
+
+}
+
+
+# Find all mobile apps assigned to a group
+# Connect to Beta endpoint for MS Graph to ensure all apps are returned
+
+update-msgraphenvironment -schema beta
+
+$groupName = "Intune - Pilot Users"
+
+$MAPPs = Get-IntuneMobileApp
+
+Write-Host "Finding all mobile apps assigned to $($groupName)" -ForegroundColor Green
+
+foreach($MAPP in $MAPPs){
+
+        $MAPPA = Get-IntuneMobileAppAssignment -mobileAppId $MAPP.id
+
+        foreach($group in $MAPPA){
+
+            if($null -ne $group.target.groupId){
+
+                $Assignments = Get-AADGroup -groupid $group.target.groupId
+
+                if($Assignments.displayName -eq $groupName) {
+                    Write-Host "$($MAPP.displayName) - $($MAPP.'@odata.type')" -ForegroundColor Yellow
+                }
+
+            }
+
+    }
+                     
+}
