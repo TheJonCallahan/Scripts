@@ -1,6 +1,6 @@
 $adminName = "LocalUser"
 $adminPass = 'Pa$$word123'
-iex "net user /add $adminName $adminPass"
+Invoke-Expression -Command "net user /add $adminName $adminPass"
 $user = New-Object System.Security.Principal.NTAccount($adminName) 
 $sid = $user.Translate([System.Security.Principal.SecurityIdentifier]) 
 $sid = $sid.Value;
