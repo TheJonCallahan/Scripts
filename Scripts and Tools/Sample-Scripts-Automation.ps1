@@ -156,3 +156,15 @@ foreach($app in $mobileApp)
     Write-host $app.displayName
  
 }
+
+
+$appAssignment = Get-IntuneMobileApp
+
+foreach($app in $appAssignment)
+{
+ 
+    Write-host $app.displayName
+
+    $app | Get-IntuneMobileAppAssignment | Format-Table settings
+ 
+}
